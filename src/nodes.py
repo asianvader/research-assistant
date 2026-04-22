@@ -90,6 +90,19 @@ def research(state: ResearchState) -> dict:
     }
 
 
+def synthesize_report(state: ResearchState) -> dict:
+    search_results_str = "\n\n".join(
+        f"Query: {r['query']}\nTitle: {r['title']}\nURL: {r['url']}\nContent: {r['content']}"
+        for r in state["search_results"]
+    )
+    prompt = SYNTHESIZE_REPORT_PROMPT.format(
+        question=state["question"],
+        search_results=search_results_str,
+    )
+    response = llm.invoke(prompt)
+    return {"report": response.content.strip()}
+
+
 def evaluate_quality(state: ResearchState) -> dict:
     sub_queries_str = "\n".join(f"- {q}" for q in state["sub_queries"])
     search_results_str = "\n\n".join(
