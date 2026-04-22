@@ -32,3 +32,18 @@ def decompose_question(state: ResearchState) -> dict:
         else:
             sub_queries.append(line)
     return {"sub_queries": sub_queries}
+
+
+def evaluate_quality(state: ResearchState) -> dict:
+    sub_queries_str = "\n".join(f"- {q}" for q in state["sub_queries"])
+    search_results_str = "\n\n".join(
+        f"Query: {r['query']}\nTitle: {r['title']}\nURL: {r['url']}\nContent: {r['content']}"
+        for r in state["search_results"]
+    )
+    prompt = EVALUATE_QUALITY_PROMPT.format(
+        question=state["question"],
+        sub_queries=sub_queries_str,
+        search_results=search_results_str,
+    )
+    response = llm.invoke(prompt)
+    return {"evaluation": response.content.strip()}
