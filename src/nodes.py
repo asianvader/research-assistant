@@ -1,5 +1,5 @@
 from langchain_anthropic import ChatAnthropic
-from langchain_community.tools.tavily_search import TavilySearchResults
+from langchain_tavily import TavilySearch
 
 from state import ResearchState
 from prompts import (
@@ -34,7 +34,7 @@ def decompose_question(state: ResearchState) -> dict:
     return {"sub_queries": sub_queries}
 
 
-search_tool = TavilySearchResults(
+search_tool = TavilySearch(
     max_results=5,
     search_depth="advanced",
 )
