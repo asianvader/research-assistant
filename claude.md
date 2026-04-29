@@ -315,6 +315,65 @@ __pycache__/
 
 ---
 
+## Git Workflow
+
+### Branching
+
+- **Never commit directly to `main`** — all changes must go through a feature branch
+- Branch naming: `feat/<short-description>`, `fix/<short-description>`, `chore/<short-description>`
+
+```bash
+git checkout -b feat/my-feature
+```
+
+### Commit Often
+
+Commit after each logical unit of work — don't batch unrelated changes into one commit. Good checkpoints:
+- After adding a new file
+- After making a node or edge work correctly
+- After fixing a bug
+- After updating dependencies
+
+### Conventional Commits
+
+All commit messages must follow the [Conventional Commits](https://www.conventionalcommits.org/) format:
+
+```
+<type>(<optional scope>): <short description>
+
+<optional body>
+```
+
+**Types:**
+
+| Type | When to use |
+|------|-------------|
+| `feat` | A new feature or capability |
+| `fix` | A bug fix |
+| `chore` | Dependency updates, config changes, tooling |
+| `refactor` | Code restructuring with no behaviour change |
+| `docs` | Documentation only |
+| `test` | Adding or updating tests |
+| `style` | Formatting, whitespace (no logic change) |
+
+**Examples:**
+
+```
+feat(graph): add checkpointer support to build_graph
+
+fix(nodes): handle empty Tavily results without crashing
+
+chore: add langgraph-cli as dev dependency
+
+docs(claude.md): add git workflow guidelines
+```
+
+### Merging
+
+Open a pull request to merge your branch into `main`. Do not merge locally unless there is a specific reason to.
+
+---
+
 ## Example Test Questions
 
 Use these to validate the app works correctly:
