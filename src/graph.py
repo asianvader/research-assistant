@@ -1,4 +1,5 @@
 from langgraph.graph import StateGraph, END
+from langgraph.checkpoint.memory import MemorySaver
 
 from state import ResearchState
 from nodes import decompose_question, research, evaluate_quality, synthesize_report
@@ -12,7 +13,7 @@ def should_continue_research(state: ResearchState) -> str:
     return "synthesize"
 
 
-def build_graph():
+def build_graph(checkpointer=None):
     workflow = StateGraph(ResearchState)
 
     workflow.add_node("decompose", decompose_question)
@@ -36,4 +37,4 @@ def build_graph():
 
     workflow.add_edge("synthesize", END)
 
-    return workflow.compile()
+    return workflow.compile(checkpointer=checkpointer)
