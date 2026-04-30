@@ -15,7 +15,7 @@ A local research assistant app that takes a complex question, breaks it into sub
 | **LangGraph** | Stateful agent workflow orchestration |
 | **LangChain** | LLM integrations and tool abstractions |
 | **Anthropic Claude** | LLM provider (via `langchain-anthropic`) |
-| **Tavily** | Web search tool for research (via `langchain-community`) |
+| **Tavily** | Web search tool for research (via `tavily-python`) |
 | **Streamlit** | Frontend UI |
 
 ---
@@ -24,7 +24,7 @@ A local research assistant app that takes a complex question, breaks it into sub
 
 ```
 research-assistant/
-├── claude.md              # This file - project guide
+├── CLAUDE.md              # This file - project guide
 ├── pyproject.toml          # uv project config and dependencies
 ├── .env                    # API keys (ANTHROPIC_API_KEY, TAVILY_API_KEY)
 ├── .gitignore
@@ -270,12 +270,11 @@ llm = ChatAnthropic(
 ### Tavily Search Setup
 
 ```python
-from langchain_community.tools.tavily_search import TavilySearchResults
+import os
+from tavily import TavilyClient
 
-search_tool = TavilySearchResults(
-    max_results=5,
-    search_depth="advanced",
-)
+search_tool = TavilyClient(api_key=os.environ.get("TAVILY_API_KEY"))
+# Use search_tool.search(query, max_results=3, search_depth="basic")
 ```
 
 ---
@@ -312,6 +311,65 @@ __pycache__/
 4. **Wire up `graph.py`** — connect nodes with edges and conditional logic
 5. **Build `app.py`** — create the Streamlit UI and connect it to the graph
 6. **Test end-to-end** — run with a simple question first, then try complex multi-part questions
+
+---
+
+## Git Workflow
+
+### Branching
+
+- **Never commit directly to `main`** — all changes must go through a feature branch
+- Branch naming: `feat/<short-description>`, `fix/<short-description>`, `chore/<short-description>`
+
+```bash
+git checkout -b feat/my-feature
+```
+
+### Commit Often
+
+Commit after each logical unit of work — don't batch unrelated changes into one commit. Good checkpoints:
+- After adding a new file
+- After making a node or edge work correctly
+- After fixing a bug
+- After updating dependencies
+
+### Conventional Commits
+
+All commit messages must follow the [Conventional Commits](https://www.conventionalcommits.org/) format:
+
+```
+<type>(<optional scope>): <short description>
+
+<optional body>
+```
+
+**Types:**
+
+| Type | When to use |
+|------|-------------|
+| `feat` | A new feature or capability |
+| `fix` | A bug fix |
+| `chore` | Dependency updates, config changes, tooling |
+| `refactor` | Code restructuring with no behaviour change |
+| `docs` | Documentation only |
+| `test` | Adding or updating tests |
+| `style` | Formatting, whitespace (no logic change) |
+
+**Examples:**
+
+```
+feat(graph): add checkpointer support to build_graph
+
+fix(nodes): handle empty Tavily results without crashing
+
+chore: add langgraph-cli as dev dependency
+
+docs(claude.md): add git workflow guidelines
+```
+
+### Merging
+
+Open a pull request to merge your branch into `main`. Do not merge locally unless there is a specific reason to.
 
 ---
 

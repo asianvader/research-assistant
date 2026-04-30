@@ -1,3 +1,12 @@
+import sys
+from pathlib import Path
+
+# When loaded by langgraph-api via importlib (e.g. langgraph dev), the src/
+# directory is not automatically added to sys.path, so bare imports fail.
+_src_dir = str(Path(__file__).parent)
+if _src_dir not in sys.path:
+    sys.path.insert(0, _src_dir)
+
 from langgraph.graph import StateGraph, END
 
 from state import ResearchState
