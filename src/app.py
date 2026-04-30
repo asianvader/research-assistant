@@ -1,9 +1,7 @@
 from dotenv import load_dotenv
 load_dotenv()
 
-import uuid
 import streamlit as st
-from langgraph.checkpoint.memory import MemorySaver
 from graph import build_graph
 
 st.title("Research Assistant")
@@ -15,18 +13,10 @@ if st.button("Research", type="primary"):
     if not question.strip():
         st.warning("Please enter a question.")
     else:
-        if "checkpointer" not in st.session_state:
-            st.session_state.checkpointer = MemorySaver()
-
-        graph = build_graph(checkpointer=st.session_state.checkpointer)
-        thread_id = str(uuid.uuid4())
-        config = {"configurable": {"thread_id": thread_id}}
+        graph = build_graph()
 
         with st.status("Researching...", expanded=True) as status:
-            result = graph.invoke(
-                {"question": question, "refinement_count": 0},
-                config=config,
-            )
+            result = graph.invoke({"question": question, "refinement_count": 0})
 
             with st.expander("Sub-queries", expanded=False):
                 for q in result.get("sub_queries", []):

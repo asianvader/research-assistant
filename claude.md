@@ -15,7 +15,7 @@ A local research assistant app that takes a complex question, breaks it into sub
 | **LangGraph** | Stateful agent workflow orchestration |
 | **LangChain** | LLM integrations and tool abstractions |
 | **Anthropic Claude** | LLM provider (via `langchain-anthropic`) |
-| **Tavily** | Web search tool for research (via `langchain-community`) |
+| **Tavily** | Web search tool for research (via `tavily-python`) |
 | **Streamlit** | Frontend UI |
 
 ---
@@ -24,7 +24,7 @@ A local research assistant app that takes a complex question, breaks it into sub
 
 ```
 research-assistant/
-├── claude.md              # This file - project guide
+├── CLAUDE.md              # This file - project guide
 ├── pyproject.toml          # uv project config and dependencies
 ├── .env                    # API keys (ANTHROPIC_API_KEY, TAVILY_API_KEY)
 ├── .gitignore
@@ -270,12 +270,11 @@ llm = ChatAnthropic(
 ### Tavily Search Setup
 
 ```python
-from langchain_community.tools.tavily_search import TavilySearchResults
+import os
+from tavily import TavilyClient
 
-search_tool = TavilySearchResults(
-    max_results=5,
-    search_depth="advanced",
-)
+search_tool = TavilyClient(api_key=os.environ.get("TAVILY_API_KEY"))
+# Use search_tool.search(query, max_results=3, search_depth="basic")
 ```
 
 ---
