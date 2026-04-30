@@ -1,5 +1,7 @@
+import os
+
+from tavily import TavilyClient
 from langchain_anthropic import ChatAnthropic
-from langchain_tavily import TavilySearch
 
 from state import ResearchState
 from prompts import (
@@ -15,10 +17,17 @@ llm = ChatAnthropic(
     max_tokens=4096,
 )
 
+# Smaller token budget for short-output nodes (decompose, evaluate)
+llm_short = ChatAnthropic(
+    model="claude-sonnet-4-20250514",
+    temperature=0.3,
+    max_tokens=512,
+)
+
 
 def decompose_question(state: ResearchState) -> dict:
     prompt = DECOMPOSE_QUESTION_PROMPT.format(question=state["question"])
-    response = llm.invoke(prompt)
+    response = llm_short.invoke(prompt)
     lines = [
         line.strip()
         for line in response.content.strip().splitlines()
@@ -34,15 +43,14 @@ def decompose_question(state: ResearchState) -> dict:
     return {"sub_queries": sub_queries}
 
 
-search_tool = TavilySearch(
-    max_results=5,
-    search_depth="advanced",
-)
+_tavily_key = os.environ.get("TAVILY_API_KEY")
+print(f"[nodes] TAVILY_API_KEY loaded: {'YES (' + _tavily_key[:12] + '...)' if _tavily_key else 'NO - key is None!'}")
+search_tool = TavilyClient(api_key=_tavily_key)
 
 
 def research(state: ResearchState) -> dict:
     sub_queries = state["sub_queries"]
-    refinement_count = state["refinement_count"]
+    refinement_count = state.get("refinement_count", 0)
     evaluation = state.get("evaluation", "")
 
     if evaluation.startswith("gaps:"):
@@ -66,15 +74,18 @@ def research(state: ResearchState) -> dict:
     new_results = []
     for query in sub_queries:
         try:
-            results = search_tool.invoke(query)
-            for r in results:
+            response = search_tool.search(query, max_results=3, search_depth="basic")
+            results_list = response.get("results", [])
+            print(f"[research] Query '{query[:60]}': {len(results_list)} results returned")
+            for r in results_list:
                 new_results.append({
                     "query": query,
                     "title": r.get("title", ""),
                     "url": r.get("url", ""),
-                    "content": r.get("content", ""),
+                    "content": r.get("content", "")[:500],  # truncate to stay within token limits
                 })
-        except Exception:
+        except Exception as e:
+            print(f"[research] Search FAILED for query '{query}': {type(e).__name__}: {e}")
             new_results.append({
                 "query": query,
                 "title": "",
@@ -114,5 +125,5 @@ def evaluate_quality(state: ResearchState) -> dict:
         sub_queries=sub_queries_str,
         search_results=search_results_str,
     )
-    response = llm.invoke(prompt)
+    response = llm_short.invoke(prompt)
     return {"evaluation": response.content.strip()}
